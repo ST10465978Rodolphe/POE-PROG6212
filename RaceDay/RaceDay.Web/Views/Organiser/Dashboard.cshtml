@@ -1,0 +1,79 @@
+﻿@model RaceDay.Web.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h1 class="page-title mb-4">Organiser dashboard</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="rd-card stat-card">
+            <div class="stat-number">@Model.TotalEvents</div>
+            <div class="stat-label">Events created</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="rd-card stat-card">
+            <div class="stat-number">@Model.UpcomingEvents</div>
+            <div class="stat-label">Upcoming events</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="rd-card stat-card">
+            <div class="stat-number">@Model.TotalEnrolments</div>
+            <div class="stat-label">Total enrolments</div>
+        </div>
+    </div>
+</div>
+
+<h2 class="h4 mb-3">Your events</h2>
+
+@if (!Model.Events.Any())
+{
+    <div class="rd-card text-center py-5">
+        <p class="mb-0 text-muted">You have not created any events yet.</p>
+    </div>
+}
+else
+{
+    <div class="rd-card p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Type</th>
+                        <th class="text-end">Distance</th>
+                        <th class="text-end">Enrolments</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Events)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@item.Event.EventName</td>
+                            <td>@item.Event.EventDate.ToString("dd MMM yyyy")</td>
+                            <td>@item.Event.Location</td>
+                            <td><span class="type-badge">@item.Event.EventType</span></td>
+                            <td class="text-end">@item.Event.Distance.ToString("0.##") km</td>
+                            <td class="text-end fw-semibold">@item.Enrolments</td>
+                            <td>
+                                @if (item.IsUpcoming)
+                                {
+                                    <span class="status-badge status-confirmed">Upcoming</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge status-past">Past</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
