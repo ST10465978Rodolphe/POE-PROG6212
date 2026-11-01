@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using RaceDay.Contracts;
@@ -43,23 +44,42 @@ public class ApiClient
         SendAsync<T>(HttpMethod.Get, url, null);
 
     public Task<ApiResult<T>> PostAsync<T>(string url, object? body) =>
-        SendAsync<T>(HttpMethod.Post, url, body);
+        SendAsync<T>(HttpMethod.Post, url, ToJson(body));
 
     public Task<ApiResult<T>> PutAsync<T>(string url, object? body) =>
-        SendAsync<T>(HttpMethod.Put, url, body);
+        SendAsync<T>(HttpMethod.Put, url, ToJson(body));
 
     public Task<ApiResult<T>> DeleteAsync<T>(string url) =>
         SendAsync<T>(HttpMethod.Delete, url, null);
+
+    // Sends an image to the API as multipart form data (field name "file").
+    // The API stores it in Azure Blob Storage: this site never talks to Azure itself.
+    public Task<ApiResult<T>> UploadAsync<T>(string url, IFormFile file)
+    {
+        var content = new MultipartFormDataContent();
+        var fileContent = new StreamContent(file.OpenReadStream());
+
+        if (!string.IsNullOrWhiteSpace(file.ContentType))
+        {
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+        }
+
+        content.Add(fileContent, "file", file.FileName);
+        return SendAsync<T>(HttpMethod.Post, url, content);
+    }
 
     // Login is special: the API starts a session and we must keep its cookie
     public Task<ApiResult<AuthResponse>> LoginAsync(LoginRequest request)
     {
         Session.Remove(SessionKeys.ApiCookie); // always start a fresh API session
-        return SendAsync<AuthResponse>(HttpMethod.Post, "api/auth/login", request, isLogin: true);
+        return SendAsync<AuthResponse>(HttpMethod.Post, "api/auth/login", ToJson(request), isLogin: true);
     }
 
+    private static HttpContent? ToJson(object? body) =>
+        body == null ? null : JsonContent.Create(body);
+
     private async Task<ApiResult<T>> SendAsync<T>(
-        HttpMethod method, string url, object? body, bool isLogin = false)
+        HttpMethod method, string url, HttpContent? content, bool isLogin = false)
     {
         var client = _factory.CreateClient("RaceDayApi");
         using var request = new HttpRequestMessage(method, url);
@@ -71,10 +91,7 @@ public class ApiClient
             request.Headers.Add("Cookie", cookie);
         }
 
-        if (body != null)
-        {
-            request.Content = JsonContent.Create(body);
-        }
+        request.Content = content;
 
         HttpResponseMessage response;
         try
