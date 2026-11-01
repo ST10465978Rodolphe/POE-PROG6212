@@ -66,7 +66,83 @@ public class OrganiserController : Controller
         return View(model);
     }
 
-    // ---------- Placeholder (built in the next step) ----------
+    // ---------- My events ----------
 
-    public IActionResult Events() => View("ComingSoon", "My Events");
+    public async Task<IActionResult> Events()
+    {
+        var events = await _api.GetAsync<List<EventDto>>("api/events/mine");
+
+        if (events.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        if (!events.Success)
+        {
+            TempData["Error"] = events.Error;
+            return View(new List<EventDto>());
+        }
+
+        return View(events.Data ?? new List<EventDto>());
+    }
+
+    // ---------- Create an event ----------
+
+    [HttpGet]
+    public IActionResult CreateEvent()
+    {
+        return View("EventForm", new EventFormViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateEvent(EventFormViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("EventForm", model);
+        }
+
+        var created = await _api.PostAsync<EventDto>("api/events", ToRequest(model));
+
+        if (created.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        if (!created.Success || created.Data == null)
+        {
+            ModelState.AddModelError(string.Empty, created.Error);
+            return View("EventForm", model);
+        }
+
+        // The banner is optional. The file goes to the API, which stores it in Azure.
+        if (model.Banner != null && model.Banner.Length > 0)
+        {
+            var upload = await _api.UploadAsync<UploadResponse>(
+                $"api/events/{created.Data.EventId}/banner", model.Banner);
+
+            if (!upload.Success)
+            {
+                TempData["Error"] = $"The event was created, but the banner could not be saved: {upload.Error}";
+                return RedirectToAction(nameof(Events));
+            }
+        }
+
+        TempData["Success"] = "Your event was created.";
+        return RedirectToAction(nameof(Events));
+    }
+
+    // ---------- Helpers ----------
+
+    // Turns the form into the request the API expects
+    private static CreateEventRequest ToRequest(EventFormViewModel model) => new()
+    {
+        EventName = model.EventName.Trim(),
+        Description = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description.Trim(),
+        EventDate = model.EventDate!.Value,
+        Location = model.Location.Trim(),
+        Distance = model.Distance!.Value,
+        EventType = model.EventType
+    };
 }

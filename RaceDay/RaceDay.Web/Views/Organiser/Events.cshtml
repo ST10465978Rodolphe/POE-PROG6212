@@ -1,0 +1,51 @@
+﻿@model List<RaceDay.Contracts.EventDto>
+@{
+    ViewData["Title"] = "My Events";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <h1 class="page-title mb-0">My events</h1>
+    <a asp-action="CreateEvent" class="btn btn-primary">Create event</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="rd-card text-center py-5">
+        <h2 class="card-heading">No events yet</h2>
+        <p class="text-muted">Create your first event and participants will be able to find it and enter.</p>
+        <a asp-action="CreateEvent" class="btn btn-primary">Create your first event</a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var ev in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="rd-card event-card h-100">
+                    @if (!string.IsNullOrEmpty(ev.BannerUrl))
+                    {
+                        <img src="@ev.BannerUrl" class="event-banner" alt="Banner for @ev.EventName" />
+                    }
+                    else
+                    {
+                        <div class="event-banner" role="img" aria-label="No banner image"></div>
+                    }
+
+                    <div class="event-card-body">
+                        <h2 class="card-heading">@ev.EventName</h2>
+                        <p class="event-meta mb-2">@ev.EventDate.ToString("dd MMM yyyy") &middot; @ev.Location</p>
+                        <p class="mb-2">
+                            <span class="type-badge">@ev.EventType</span>
+                            <span class="event-distance">@ev.Distance.ToString("0.##") km</span>
+                        </p>
+                        @if (!string.IsNullOrWhiteSpace(ev.Description))
+                        {
+                            <p class="text-muted mb-0">@ev.Description</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

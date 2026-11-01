@@ -305,3 +305,33 @@ a.rd-card {
     background-color: #e8ecf0;
     color: #55626f;
 }
+
+/* ---------- Event cards and forms ---------- */
+
+.event-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.event-card-body {
+    padding: 1.25rem;
+}
+
+.event-meta {
+    color: var(--rd-muted);
+    font-size: 0.9rem;
+}
+
+.event-distance {
+    margin-left: 0.4rem;
+    font-weight: 600;
+    color: var(--rd-navy);
+}
+
+.form-banner-preview {
+    width: 100%;
+    max-height: 180px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    border: 1px solid var(--rd-border);
+}
