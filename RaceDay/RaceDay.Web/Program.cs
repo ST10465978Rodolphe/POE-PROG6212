@@ -1,3 +1,5 @@
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
 using RaceDay.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,15 +36,22 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Always use "." for decimals and the same date format, whatever the Windows language is
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("en-US"),
+    SupportedCultures = new[] { new CultureInfo("en-US") },
+    SupportedUICultures = new[] { new CultureInfo("en-US") }
+});
+
 app.UseRouting();
 
 // Enable session middleware
 app.UseSession();
-
 app.UseAuthorization();
 
 app.MapStaticAssets();
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
