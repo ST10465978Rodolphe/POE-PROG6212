@@ -133,6 +133,100 @@ public class OrganiserController : Controller
         return RedirectToAction(nameof(Events));
     }
 
+    // ---------- Edit an event ----------
+
+    [HttpGet]
+    public async Task<IActionResult> EditEvent(int id)
+    {
+        var result = await _api.GetAsync<EventDto>($"api/events/{id}");
+
+        if (result.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        if (!result.Success || result.Data == null)
+        {
+            TempData["Error"] = result.Error;
+            return RedirectToAction(nameof(Events));
+        }
+
+        // Friendly check for the screen. The API enforces this rule as well.
+        if (result.Data.OrganiserId != HttpContext.Session.GetUserId())
+        {
+            TempData["Error"] = "You can only edit your own events.";
+            return RedirectToAction(nameof(Events));
+        }
+
+        return View("EventForm", ToForm(result.Data));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditEvent(int id, EventFormViewModel model)
+    {
+        model.EventId = id;
+
+        if (!ModelState.IsValid)
+        {
+            return View("EventForm", model);
+        }
+
+        var updated = await _api.PutAsync<EventDto>($"api/events/{id}", ToRequest(model));
+
+        if (updated.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        if (!updated.Success)
+        {
+            ModelState.AddModelError(string.Empty, updated.Error);
+            return View("EventForm", model);
+        }
+
+        // A new banner replaces the old one (the API removes the old image from Azure)
+        if (model.Banner != null && model.Banner.Length > 0)
+        {
+            var upload = await _api.UploadAsync<UploadResponse>($"api/events/{id}/banner", model.Banner);
+
+            if (!upload.Success)
+            {
+                TempData["Error"] = $"Your changes were saved, but the banner could not be replaced: {upload.Error}";
+                return RedirectToAction(nameof(EditEvent), new { id });
+            }
+        }
+
+        TempData["Success"] = "Your event was updated.";
+        return RedirectToAction(nameof(Events));
+    }
+
+    // ---------- Delete an event ----------
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteEvent(int id)
+    {
+        var result = await _api.DeleteAsync<MessageResponse>($"api/events/{id}");
+
+        if (result.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        if (result.Success)
+        {
+            TempData["Success"] = "The event was deleted.";
+        }
+        else
+        {
+            // For example: an event that already has enrolments cannot be deleted
+            TempData["Error"] = result.Error;
+        }
+
+        return RedirectToAction(nameof(Events));
+    }
+
     // ---------- Helpers ----------
 
     // Turns the form into the request the API expects
@@ -144,5 +238,18 @@ public class OrganiserController : Controller
         Location = model.Location.Trim(),
         Distance = model.Distance!.Value,
         EventType = model.EventType
+    };
+
+    // Fills the form with an existing event
+    private static EventFormViewModel ToForm(EventDto ev) => new()
+    {
+        EventId = ev.EventId,
+        EventName = ev.EventName,
+        Description = ev.Description,
+        EventDate = ev.EventDate,
+        Location = ev.Location,
+        Distance = ev.Distance,
+        EventType = ev.EventType,
+        BannerUrl = ev.BannerUrl
     };
 }

@@ -41,8 +41,17 @@ else
                         </p>
                         @if (!string.IsNullOrWhiteSpace(ev.Description))
                         {
-                            <p class="text-muted mb-0">@ev.Description</p>
+                            <p class="text-muted">@ev.Description</p>
                         }
+
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            <a asp-action="EditEvent" asp-route-id="@ev.EventId" class="btn btn-outline-primary btn-sm">Edit</a>
+
+                            <form asp-action="DeleteEvent" asp-route-id="@ev.EventId" method="post" class="d-inline"
+                                  onsubmit="return confirm('Delete this event? This cannot be undone.');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
