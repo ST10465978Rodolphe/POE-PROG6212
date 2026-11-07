@@ -1,0 +1,89 @@
+﻿@using RaceDay.Web.Services
+@model RaceDay.Web.Models.EventResultsViewModel
+@{
+    ViewData["Title"] = "Results";
+}
+
+<p class="mb-2"><a asp-controller="Organiser" asp-action="Events">&larr; Back to my events</a></p>
+
+<h1 class="page-title mb-1">Results</h1>
+<p class="event-meta mb-4">
+    @Model.Event.EventName &middot; @Model.Event.EventDate.ToString("dd MMM yyyy") &middot; @Model.Event.Location
+</p>
+
+@if (Model.EventIsInTheFuture)
+{
+    <div class="alert alert-warning">
+        This event has not taken place yet. Results are normally entered after the event.
+    </div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="rd-card stat-card">
+            <div class="stat-number">@Model.RecordedCount</div>
+            <div class="stat-label">Results recorded</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="rd-card stat-card">
+            <div class="stat-number">@Model.WaitingCount</div>
+            <div class="stat-label">Still to record</div>
+        </div>
+    </div>
+</div>
+
+@if (!Model.Rows.Any())
+{
+    <div class="rd-card text-center py-5">
+        <p class="mb-0 text-muted">There are no confirmed participants for this event yet.</p>
+    </div>
+}
+else
+{
+    <div class="rd-card p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Participant</th>
+                        <th>Category</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Rows)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@row.Enrolment.ParticipantName</td>
+                            <td>@row.Enrolment.CategoryName</td>
+                            <td>
+                                @if (row.Result != null)
+                                {
+                                    <span class="fw-semibold">@DisplayFormat.Time(row.Result.FinishTime)</span>
+                                    <span class="ms-2">@DisplayFormat.Ordinal(row.Result.Position)</span>
+                                    <span class="status-badge status-confirmed ms-2">Recorded</span>
+                                }
+                                else
+                                {
+                                    <form asp-action="Record" asp-route-eventId="@Model.Event.EventId" method="post" class="result-form">
+                                        <input type="hidden" name="enrolmentId" value="@row.Enrolment.EnrolmentId" />
+                                        <input type="text" name="finishTime" class="form-control form-control-sm"
+                                               placeholder="h:mm:ss" aria-label="Finish time" autocomplete="off" />
+                                        <input type="number" name="position" min="1" class="form-control form-control-sm"
+                                               placeholder="Position" aria-label="Finishing position" />
+                                        <button type="submit" class="btn btn-primary btn-sm">Save result</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <p class="small text-muted mt-3">
+        Finish times use the format hours:minutes:seconds, for example 0:52:35. A result cannot be changed once it is saved.
+    </p>
+}

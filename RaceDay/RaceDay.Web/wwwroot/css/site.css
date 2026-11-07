@@ -2,7 +2,6 @@
    RaceDay brand theme
    One place for every colour and font, so all pages match.
    ===================================================== */
-
 :root {
     --rd-navy: #0d1b2a;
     --rd-navy-soft: #1b2b40;
@@ -21,7 +20,6 @@
 }
 
 /* ---------- Base ---------- */
-
 html {
     font-size: 15px;
 }
@@ -59,7 +57,6 @@ a {
     }
 
 /* ---------- Navbar ---------- */
-
 .rd-navbar {
     background-color: var(--rd-navy);
     border-bottom: 3px solid var(--rd-orange);
@@ -103,7 +100,6 @@ a {
 }
 
 /* ---------- Buttons and forms ---------- */
-
 .btn-primary {
     background-color: var(--rd-orange);
     border-color: var(--rd-orange);
@@ -130,8 +126,7 @@ a {
         color: #fff;
     }
 
-.form-control:focus,
-.form-select:focus {
+.form-control:focus, .form-select:focus {
     border-color: var(--rd-orange);
     box-shadow: 0 0 0 0.2rem rgba(255, 90, 31, 0.2);
 }
@@ -141,7 +136,6 @@ a {
 }
 
 /* ---------- Cards ---------- */
-
 .rd-card {
     background-color: #fff;
     border: 1px solid var(--rd-border);
@@ -174,7 +168,6 @@ a.rd-card {
     }
 
 /* ---------- Tables ---------- */
-
 .table thead th {
     background-color: var(--rd-navy);
     color: #fff;
@@ -187,7 +180,6 @@ a.rd-card {
 }
 
 /* ---------- Status badges (colour coded) ---------- */
-
 .status-badge {
     display: inline-block;
     padding: 0.2rem 0.7rem;
@@ -212,14 +204,10 @@ a.rd-card {
 }
 
 /* ---------- Landing page hero ---------- */
-
 .hero {
     padding: 5rem 0;
     color: #fff;
     background: linear-gradient(120deg, rgba(13, 27, 42, 0.95) 0%, rgba(13, 27, 42, 0.8) 55%, rgba(255, 90, 31, 0.9) 100%);
-    /* To use a photo: save one as wwwroot/images/hero.jpg, then replace the line above with
-       background: linear-gradient(120deg, rgba(13, 27, 42, 0.92) 0%, rgba(13, 27, 42, 0.75) 55%, rgba(255, 90, 31, 0.85) 100%),
-                   url('/images/hero.jpg') center / cover no-repeat; */
 }
 
 .hero-kicker {
@@ -243,7 +231,6 @@ a.rd-card {
 }
 
 /* ---------- Event banners (used on later pages) ---------- */
-
 .event-banner {
     width: 100%;
     height: 180px;
@@ -253,7 +240,6 @@ a.rd-card {
 }
 
 /* ---------- Footer ---------- */
-
 .rd-footer {
     background-color: var(--rd-navy);
     color: rgba(255, 255, 255, 0.7);
@@ -266,7 +252,6 @@ a.rd-card {
     }
 
 /* ---------- Dashboard ---------- */
-
 .stat-card {
     text-align: center;
     border-top: 4px solid var(--rd-orange);
@@ -307,7 +292,6 @@ a.rd-card {
 }
 
 /* ---------- Event cards and forms ---------- */
-
 .event-card {
     padding: 0;
     overflow: hidden;
@@ -335,3 +319,19 @@ a.rd-card {
     border-radius: 0.5rem;
     border: 1px solid var(--rd-border);
 }
+
+/* ---------- Results entry ---------- */
+.result-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+    .result-form input[type="text"] {
+        width: 7.5rem;
+    }
+
+    .result-form input[type="number"] {
+        width: 6.5rem;
+    }
