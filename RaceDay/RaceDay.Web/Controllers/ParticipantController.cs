@@ -87,8 +87,10 @@ public class ParticipantController : Controller
         }
 
         var categories = await _api.GetAsync<List<CategoryDto>>($"api/events/{id}/categories");
+        var mine = await _api.GetAsync<List<EnrolmentDto>>("api/enrolments/mine");
 
-        if (categories.StatusCode == HttpStatusCode.Unauthorized)
+        if (categories.StatusCode == HttpStatusCode.Unauthorized ||
+            mine.StatusCode == HttpStatusCode.Unauthorized)
         {
             return RedirectToAction("Login", "Account");
         }
@@ -104,8 +106,48 @@ public class ParticipantController : Controller
             Categories = (categories.Data ?? new List<CategoryDto>())
                 .OrderBy(c => c.Distance)
                 .ThenBy(c => c.CategoryName)
-                .ToList()
+                .ToList(),
+
+            // Is this Participant already entered in this event?
+            Enrolment = mine.Data?.FirstOrDefault(e => e.EventId == id && e.Status == "Confirmed")
         });
+    }
+
+    // ---------- Enter an event ----------
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Enrol(int eventId, int? categoryId)
+    {
+        if (categoryId == null)
+        {
+            TempData["Error"] = "Please choose a category to enter.";
+            return RedirectToAction(nameof(EventDetails), new { id = eventId });
+        }
+
+        // The API records the link between this Participant, the event and the category
+        var result = await _api.PostAsync<EnrolmentDto>("api/enrolments", new CreateEnrolmentRequest
+        {
+            EventId = eventId,
+            CategoryId = categoryId.Value
+        });
+
+        if (result.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        if (result.Success && result.Data != null)
+        {
+            TempData["Success"] = $"You are entered in {result.Data.EventName} ({result.Data.CategoryName}).";
+        }
+        else
+        {
+            // For example: already enrolled, or the event has already taken place
+            TempData["Error"] = result.Error;
+        }
+
+        return RedirectToAction(nameof(EventDetails), new { id = eventId });
     }
 
     // ---------- Placeholders (built in the next steps) ----------

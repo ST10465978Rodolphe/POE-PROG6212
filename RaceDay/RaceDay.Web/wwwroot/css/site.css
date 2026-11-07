@@ -340,3 +340,31 @@ a.rd-card {
 .event-banner-large {
     height: 260px;
 }
+
+/* ---------- Entering an event ---------- */
+.category-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 1rem 1.25rem;
+}
+
+    .category-option:hover {
+        background-color: #fff6f1;
+    }
+
+    .category-option:has(input:checked) {
+        background-color: #fff1e9;
+        border-color: var(--rd-orange);
+        box-shadow: inset 4px 0 0 var(--rd-orange);
+    }
+
+.form-check-input:checked {
+    background-color: var(--rd-orange);
+    border-color: var(--rd-orange);
+}
+
+.enrolled-card {
+    border-left: 5px solid var(--rd-green);
+    background-color: #f4fbf7;
+}

@@ -42,7 +42,24 @@
     </div>
 </div>
 
-<h2 class="h4 mb-3">Categories</h2>
+@* ---------- Already entered ---------- *@
+@if (Model.Enrolment != null)
+{
+    <div class="rd-card enrolled-card mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h2 class="card-heading mb-1">You are entered in this event</h2>
+                <p class="mb-0">
+                    Category: <strong>@Model.Enrolment.CategoryName</strong>
+                    &middot; Entered on @Model.Enrolment.EnrolmentDate.ToString("dd MMM yyyy")
+                </p>
+            </div>
+            <partial name="_StatusBadge" model="@Model.Enrolment.Status" />
+        </div>
+    </div>
+}
+
+<h2 class="h4 mb-3">@(Model.CanEnrol ? "Choose your category and enter" : "Categories")</h2>
 
 @if (!Model.Categories.Any())
 {
@@ -50,8 +67,39 @@
         <p class="mb-0 text-muted">No categories have been added to this event yet.</p>
     </div>
 }
+else if (Model.CanEnrol)
+{
+    @* ---------- Enter this event ---------- *@
+    <form asp-action="Enrol" method="post">
+        <input type="hidden" name="eventId" value="@Model.Event.EventId" />
+
+        <div class="list-group mb-3">
+            @foreach (var c in Model.Categories)
+            {
+                <label class="list-group-item category-option" for="category-@c.CategoryId">
+                    <input class="form-check-input me-3" type="radio" name="categoryId"
+                           id="category-@c.CategoryId" value="@c.CategoryId" required />
+                    <span class="flex-grow-1">
+                        <span class="fw-semibold">@c.CategoryName</span>
+                        @if (!string.IsNullOrWhiteSpace(c.Description))
+                        {
+                            <span class="d-block small text-muted">@c.Description</span>
+                        }
+                    </span>
+                    <span class="text-nowrap ms-3">
+                        @c.Distance.ToString("0.##") km &middot;
+                        <strong>@(c.EntryFee == 0 ? "Free" : "R" + c.EntryFee.ToString("0.00"))</strong>
+                    </span>
+                </label>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg">Enter this event</button>
+    </form>
+}
 else
 {
+    @* ---------- Read-only list (already entered, or the event has passed) ---------- *@
     <div class="rd-card p-0 overflow-hidden">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
