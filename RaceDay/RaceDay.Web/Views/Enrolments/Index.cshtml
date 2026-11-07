@@ -1,0 +1,78 @@
+﻿@model RaceDay.Web.Models.EventEnrolmentsViewModel
+@{
+    ViewData["Title"] = "Enrolments";
+}
+
+<p class="mb-2"><a asp-controller="Organiser" asp-action="Events">&larr; Back to my events</a></p>
+
+<h1 class="page-title mb-1">Enrolments</h1>
+<p class="event-meta mb-4">
+    @Model.Event.EventName &middot; @Model.Event.EventDate.ToString("dd MMM yyyy") &middot; @Model.Event.Location
+</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="rd-card stat-card">
+            <div class="stat-number">@Model.ConfirmedCount</div>
+            <div class="stat-label">Confirmed</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="rd-card stat-card">
+            <div class="stat-number">@Model.CancelledCount</div>
+            <div class="stat-label">Cancelled</div>
+        </div>
+    </div>
+</div>
+
+@if (!Model.Enrolments.Any())
+{
+    <div class="rd-card text-center py-5">
+        <p class="mb-0 text-muted">Nobody has entered this event yet.</p>
+    </div>
+}
+else
+{
+    <div class="rd-card p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Participant</th>
+                        <th>Category</th>
+                        <th>Enrolled on</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in Model.Enrolments.OrderBy(x => x.CategoryName).ThenBy(x => x.ParticipantName))
+                    {
+                        <tr>
+                            <td class="fw-semibold">@e.ParticipantName</td>
+                            <td>@e.CategoryName</td>
+                            <td>@e.EnrolmentDate.ToString("dd MMM yyyy")</td>
+                            <td><partial name="_StatusBadge" model="@e.Status" /></td>
+                            <td class="text-end">
+                                <form asp-action="UpdateStatus" asp-route-eventId="@Model.Event.EventId" asp-route-id="@e.EnrolmentId"
+                                      method="post" class="d-inline">
+                                    @if (e.Status == "Confirmed")
+                                    {
+                                        <button type="submit" name="status" value="Cancelled" class="btn btn-outline-danger btn-sm"
+                                                onclick="return confirm('Cancel this enrolment?');">
+                                            Cancel enrolment
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" name="status" value="Confirmed" class="btn btn-outline-primary btn-sm">Confirm again</button>
+                                    }
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
