@@ -51,6 +51,9 @@ else
                             <a asp-controller="Enrolments" asp-action="Index" asp-route-eventId="@ev.EventId"
                                class="btn btn-primary btn-sm">Enrolments</a>
 
+                            <a asp-controller="Results" asp-action="Index" asp-route-eventId="@ev.EventId"
+                               class="btn btn-primary btn-sm">Results</a>
+
                             <a asp-action="EditEvent" asp-route-id="@ev.EventId" class="btn btn-outline-primary btn-sm">Edit</a>
 
                             <form asp-action="DeleteEvent" asp-route-id="@ev.EventId" method="post" class="d-inline"
