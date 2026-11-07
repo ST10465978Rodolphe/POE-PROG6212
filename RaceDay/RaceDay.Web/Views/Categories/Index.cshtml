@@ -1,0 +1,109 @@
+﻿@model RaceDay.Web.Models.CategoriesPageViewModel
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<p class="mb-2"><a asp-controller="Organiser" asp-action="Events">&larr; Back to my events</a></p>
+
+<h1 class="page-title mb-1">Categories</h1>
+<p class="event-meta mb-4">
+    @Model.Event.EventName &middot; @Model.Event.EventDate.ToString("dd MMM yyyy") &middot; @Model.Event.Location
+</p>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <h2 class="h4 mb-3">Categories for this event</h2>
+
+        @if (!Model.Categories.Any())
+        {
+            <div class="rd-card text-center py-4">
+                <p class="mb-0 text-muted">
+                    No categories yet. Add the age groups or distances participants can choose from.
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="rd-card p-0 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th class="text-end">Distance</th>
+                                <th class="text-end">Entry fee</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model.Categories)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">@c.CategoryName</div>
+                                        @if (!string.IsNullOrWhiteSpace(c.Description))
+                                        {
+                                            <div class="small text-muted">@c.Description</div>
+                                        }
+                                    </td>
+                                    <td class="text-end">@c.Distance.ToString("0.##") km</td>
+                                    <td class="text-end">@(c.EntryFee == 0 ? "Free" : "R" + c.EntryFee.ToString("0.00"))</td>
+                                    <td class="text-end text-nowrap">
+                                        <a asp-action="Edit" asp-route-eventId="@Model.Event.EventId" asp-route-id="@c.CategoryId"
+                                           class="btn btn-outline-primary btn-sm">Edit</a>
+                                        <form asp-action="Delete" asp-route-eventId="@Model.Event.EventId" asp-route-id="@c.CategoryId"
+                                              method="post" class="d-inline"
+                                              onsubmit="return confirm('Delete this category?');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-5">
+        <div class="rd-card">
+            <h2 class="h4 mb-3">Add a category</h2>
+
+            <form asp-action="Add" asp-route-eventId="@Model.Event.EventId" method="post" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Form.CategoryName" class="form-label"></label>
+                    <input asp-for="Form.CategoryName" class="form-control" placeholder="e.g. Under 20, Senior, 10 KM Open" />
+                    <span asp-validation-for="Form.CategoryName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Form.Description" class="form-label"></label>
+                    <input asp-for="Form.Description" class="form-control" />
+                    <span asp-validation-for="Form.Description" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label asp-for="Form.Distance" class="form-label"></label>
+                        <input asp-for="Form.Distance" type="number" step="0.01" min="0.01" class="form-control" />
+                        <span asp-validation-for="Form.Distance" class="text-danger"></span>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label asp-for="Form.EntryFee" class="form-label"></label>
+                        <input asp-for="Form.EntryFee" type="number" step="0.01" min="0" class="form-control" />
+                        <span asp-validation-for="Form.EntryFee" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Add category</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
