@@ -23,5 +23,11 @@ public class EventDetailsViewModel
     public EventDto Event { get; set; } = new();
     public List<CategoryDto> Categories { get; set; } = new();
 
+    // The logged-in Participant's active (confirmed) enrolment in this event, if any
+    public EnrolmentDto? Enrolment { get; set; }
+
     public bool HasPassed => Event.EventDate < DateOnly.FromDateTime(DateTime.Today);
+
+    // The "Enter this event" form is shown only when it makes sense
+    public bool CanEnrol => !HasPassed && Enrolment == null && Categories.Any();
 }
