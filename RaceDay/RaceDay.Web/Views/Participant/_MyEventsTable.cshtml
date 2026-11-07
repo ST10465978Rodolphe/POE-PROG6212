@@ -1,0 +1,33 @@
+﻿@model List<RaceDay.Web.Models.MyEventRow>
+
+<div class="rd-card p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Date</th>
+                    <th>Location</th>
+                    <th>Category</th>
+                    <th>Entered on</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">
+                            <a asp-action="EventDetails" asp-route-id="@row.Enrolment.EventId">@row.Enrolment.EventName</a>
+                        </td>
+                        <td>@(row.Event == null ? "-" : row.Event.EventDate.ToString("dd MMM yyyy"))</td>
+                        <td>@(row.Event?.Location ?? "-")</td>
+                        <td>@row.Enrolment.CategoryName</td>
+                        <td>@row.Enrolment.EnrolmentDate.ToString("dd MMM yyyy")</td>
+                        <td><partial name="_StatusBadge" model="@row.Enrolment.Status" /></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

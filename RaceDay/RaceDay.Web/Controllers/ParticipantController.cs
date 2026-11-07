@@ -150,9 +150,58 @@ public class ParticipantController : Controller
         return RedirectToAction(nameof(EventDetails), new { id = eventId });
     }
 
-    // ---------- Placeholders (built in the next steps) ----------
+    // ---------- My events: every event I have entered, with its status ----------
 
-    public IActionResult MyEvents() => View("ComingSoon", "My Events");
+    [HttpGet]
+    public async Task<IActionResult> MyEvents()
+    {
+        var mine = await _api.GetAsync<List<EnrolmentDto>>("api/enrolments/mine");
+        var events = await _api.GetAsync<List<EventDto>>("api/events");
+
+        if (mine.StatusCode == HttpStatusCode.Unauthorized ||
+            events.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        if (!mine.Success)
+        {
+            TempData["Error"] = mine.Error;
+            return View(new MyEventsViewModel());
+        }
+
+        if (!events.Success)
+        {
+            TempData["Error"] = "Some event details could not be loaded. Please try again later.";
+        }
+
+        // An enrolment only knows its event by name: look up the date and place
+        var eventsById = (events.Data ?? new List<EventDto>()).ToDictionary(e => e.EventId);
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        var rows = (mine.Data ?? new List<EnrolmentDto>())
+            .Select(e => new MyEventRow
+            {
+                Enrolment = e,
+                Event = eventsById.GetValueOrDefault(e.EventId)
+            })
+            .ToList();
+
+        return View(new MyEventsViewModel
+        {
+            Upcoming = rows
+                .Where(r => r.Event == null || r.Event.EventDate >= today)
+                .OrderBy(r => r.Event?.EventDate ?? DateOnly.MaxValue)
+                .ToList(),
+
+            Past = rows
+                .Where(r => r.Event != null && r.Event.EventDate < today)
+                .OrderByDescending(r => r.Event!.EventDate)
+                .ToList()
+        });
+    }
+
+    // ---------- Placeholder (built in the next step) ----------
 
     public IActionResult MyResults() => View("ComingSoon", "My Results");
 }

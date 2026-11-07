@@ -1,0 +1,32 @@
+﻿@model RaceDay.Web.Models.MyEventsViewModel
+@{
+    ViewData["Title"] = "My Events";
+}
+
+<h1 class="page-title mb-1">My events</h1>
+<p class="text-muted mb-4">Every event you have entered, and the status of each entry.</p>
+
+@if (Model.IsEmpty)
+{
+    <div class="rd-card text-center py-5">
+        <h2 class="card-heading">You have not entered any events yet</h2>
+        <p class="text-muted">Find a race you like and enter it in a few clicks.</p>
+        <a asp-action="Events" class="btn btn-primary">Browse events</a>
+    </div>
+}
+else
+{
+    @if (Model.Upcoming.Any())
+    {
+        <h2 class="h4 mb-3">Upcoming</h2>
+        <div class="mb-4">
+            <partial name="_MyEventsTable" model="Model.Upcoming" />
+        </div>
+    }
+
+    @if (Model.Past.Any())
+    {
+        <h2 class="h4 mb-3">Past</h2>
+        <partial name="_MyEventsTable" model="Model.Past" />
+    }
+}
