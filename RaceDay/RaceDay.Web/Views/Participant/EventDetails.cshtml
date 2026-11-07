@@ -1,0 +1,84 @@
+﻿@model RaceDay.Web.Models.EventDetailsViewModel
+@{
+    ViewData["Title"] = Model.Event.EventName;
+}
+
+<p class="mb-2"><a asp-action="Events">&larr; Back to events</a></p>
+
+<div class="rd-card event-card mb-4">
+    @if (!string.IsNullOrEmpty(Model.Event.BannerUrl))
+    {
+        <img src="@Model.Event.BannerUrl" class="event-banner event-banner-large" alt="Banner for @Model.Event.EventName" />
+    }
+    else
+    {
+        <div class="event-banner event-banner-large" role="img" aria-label="No banner image"></div>
+    }
+
+    <div class="event-card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+            <h1 class="page-title mb-1">@Model.Event.EventName</h1>
+            @if (Model.HasPassed)
+            {
+                <span class="status-badge status-past">This event has taken place</span>
+            }
+        </div>
+
+        <p class="event-meta mb-3">
+            @Model.Event.EventDate.ToString("dddd, dd MMMM yyyy") &middot; @Model.Event.Location
+        </p>
+
+        <p class="mb-3">
+            <span class="type-badge">@Model.Event.EventType</span>
+            <span class="event-distance">@Model.Event.Distance.ToString("0.##") km</span>
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Event.Description))
+        {
+            <p>@Model.Event.Description</p>
+        }
+
+        <p class="small text-muted mb-0">Organised by @Model.Event.OrganiserName</p>
+    </div>
+</div>
+
+<h2 class="h4 mb-3">Categories</h2>
+
+@if (!Model.Categories.Any())
+{
+    <div class="rd-card text-center py-4">
+        <p class="mb-0 text-muted">No categories have been added to this event yet.</p>
+    </div>
+}
+else
+{
+    <div class="rd-card p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th class="text-end">Distance</th>
+                        <th class="text-end">Entry fee</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model.Categories)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">@c.CategoryName</div>
+                                @if (!string.IsNullOrWhiteSpace(c.Description))
+                                {
+                                    <div class="small text-muted">@c.Description</div>
+                                }
+                            </td>
+                            <td class="text-end">@c.Distance.ToString("0.##") km</td>
+                            <td class="text-end">@(c.EntryFee == 0 ? "Free" : "R" + c.EntryFee.ToString("0.00"))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

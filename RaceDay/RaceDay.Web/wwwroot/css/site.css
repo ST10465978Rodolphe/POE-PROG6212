@@ -335,3 +335,8 @@ a.rd-card {
     .result-form input[type="number"] {
         width: 6.5rem;
     }
+
+/* ---------- Event details (participant) ---------- */
+.event-banner-large {
+    height: 260px;
+}
