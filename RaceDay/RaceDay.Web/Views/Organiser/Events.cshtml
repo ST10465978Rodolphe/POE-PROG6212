@@ -45,6 +45,8 @@ else
                         }
 
                         <div class="d-flex flex-wrap gap-2 mt-3">
+                            <a asp-controller="Categories" asp-action="Index" asp-route-eventId="@ev.EventId"
+                               class="btn btn-primary btn-sm">Categories</a>
                             <a asp-action="EditEvent" asp-route-id="@ev.EventId" class="btn btn-outline-primary btn-sm">Edit</a>
 
                             <form asp-action="DeleteEvent" asp-route-id="@ev.EventId" method="post" class="d-inline"
