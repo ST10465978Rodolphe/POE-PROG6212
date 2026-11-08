@@ -382,3 +382,25 @@ a.rd-card {
     .position-pill.podium {
         background-color: var(--rd-orange);
     }
+
+/* ---------- Profile ---------- */
+
+.avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--rd-orange);
+}
+
+.avatar-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--rd-navy);
+    color: #fff;
+    font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-size: 3.2rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
