@@ -79,14 +79,16 @@ public class ResultsController : ControllerBase
         await _db.SaveChangesAsync();
 
         var saved = await WithDetails().FirstAsync(r => r.ResultId == result.ResultId);
-        return StatusCode(StatusCodes.Status201Created, ToDto(saved));
+        var totals = await GetTotalFinishersAsync(new[] { enrolment.CategoryId });
+
+        return StatusCode(StatusCodes.Status201Created, ToDto(saved, totals));
     }
 
     [HttpGet("mine")]
     [RequireRole("Participant")]
     [SwaggerOperation(
         Summary = "List my results",
-        Description = "Participant only. Returns only the results of the logged-in Participant, newest first.")]
+        Description = "Participant only. Returns only the results of the logged-in Participant, newest first. Each result includes the event date and the number of finishers in the same category.")]
     [ProducesResponseType(typeof(List<ResultDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -100,7 +102,9 @@ public class ResultsController : ControllerBase
             .ThenByDescending(r => r.ResultId)
             .ToListAsync();
 
-        return Ok(results.Select(ToDto));
+        var totals = await GetTotalFinishersAsync(results.Select(r => r.Enrolment!.CategoryId));
+
+        return Ok(results.Select(r => ToDto(r, totals)));
     }
 
     [HttpGet("event/{eventId:int}")]
@@ -132,7 +136,9 @@ public class ResultsController : ControllerBase
             .ThenBy(r => r.FinishingPosition)
             .ToListAsync();
 
-        return Ok(results.Select(ToDto));
+        var totals = await GetTotalFinishersAsync(results.Select(r => r.Enrolment!.CategoryId));
+
+        return Ok(results.Select(r => ToDto(r, totals)));
     }
 
     // Loads the Enrolment, Participant, Category and Event so the DTO can be filled in
@@ -143,7 +149,20 @@ public class ResultsController : ControllerBase
             .ThenInclude(e => e!.Category)
                 .ThenInclude(c => c!.Event);
 
-    private static ResultDto ToDto(Result r) => new()
+    // For each category: how many participants have a recorded result.
+    // This is the "out of N finishers" shown next to a position.
+    private async Task<Dictionary<int, int>> GetTotalFinishersAsync(IEnumerable<int> categoryIds)
+    {
+        var ids = categoryIds.Distinct().ToList();
+
+        return await _db.Results
+            .Where(r => ids.Contains(r.Enrolment!.CategoryId))
+            .GroupBy(r => r.Enrolment!.CategoryId)
+            .Select(g => new { CategoryId = g.Key, Total = g.Count() })
+            .ToDictionaryAsync(x => x.CategoryId, x => x.Total);
+    }
+
+    private static ResultDto ToDto(Result r, Dictionary<int, int> totalFinishers) => new()
     {
         ResultId = r.ResultId,
         EnrolmentId = r.EnrolmentId,
@@ -151,9 +170,11 @@ public class ResultsController : ControllerBase
             ? string.Empty
             : $"{r.Enrolment.Participant.FirstName} {r.Enrolment.Participant.LastName}",
         EventName = r.Enrolment?.Category?.Event?.EventName ?? string.Empty,
+        EventDate = r.Enrolment?.Category?.Event?.EventDate ?? default,
         CategoryName = r.Enrolment?.Category?.CategoryName ?? string.Empty,
         FinishTime = r.FinishTime,
         Position = r.FinishingPosition,
+        TotalFinishers = totalFinishers.GetValueOrDefault(r.Enrolment?.CategoryId ?? 0),
         ResultDate = r.ResultDate
     };
 }
