@@ -1,0 +1,71 @@
+﻿@using RaceDay.Web.Services
+@model List<RaceDay.Contracts.ResultDto>
+@{
+    ViewData["Title"] = "My Results";
+    int podiums = Model.Count(r => r.Position <= 3);
+}
+
+<h1 class="page-title mb-1">My results</h1>
+<p class="text-muted mb-4">Your personal race history across every event you have finished.</p>
+
+@if (!Model.Any())
+{
+    <div class="rd-card text-center py-5">
+        <h2 class="card-heading">No results yet</h2>
+        <p class="text-muted mb-3">
+            Your finish times and positions will appear here once an organiser has recorded them.
+        </p>
+        <a asp-action="MyEvents" class="btn btn-primary">See my events</a>
+    </div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="rd-card stat-card">
+                <div class="stat-number">@Model.Count</div>
+                <div class="stat-label">Races finished</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="rd-card stat-card">
+                <div class="stat-number">@podiums</div>
+                <div class="stat-label">Podium finishes</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="rd-card p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Finish time</th>
+                        <th>Position</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@r.EventName</td>
+                            <td>@r.EventDate.ToString("dd MMM yyyy")</td>
+                            <td>@r.CategoryName</td>
+                            <td class="fw-semibold">@DisplayFormat.Time(r.FinishTime)</td>
+                            <td>
+                                <span class="position-pill @(r.Position <= 3 ? "podium" : "")">@DisplayFormat.Ordinal(r.Position)</span>
+                                @if (r.TotalFinishers > 0)
+                                {
+                                    <span class="text-muted ms-1">out of @r.TotalFinishers finishers</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

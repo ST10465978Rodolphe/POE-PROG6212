@@ -201,7 +201,27 @@ public class ParticipantController : Controller
         });
     }
 
-    // ---------- Placeholder (built in the next step) ----------
+    // ---------- My results: my race history ----------
 
-    public IActionResult MyResults() => View("ComingSoon", "My Results");
+    [HttpGet]
+    public async Task<IActionResult> MyResults()
+    {
+        var results = await _api.GetAsync<List<ResultDto>>("api/results/mine");
+
+        if (results.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        if (!results.Success)
+        {
+            TempData["Error"] = results.Error;
+            return View(new List<ResultDto>());
+        }
+
+        // Most recent race first
+        return View((results.Data ?? new List<ResultDto>())
+            .OrderByDescending(r => r.EventDate)
+            .ToList());
+    }
 }
