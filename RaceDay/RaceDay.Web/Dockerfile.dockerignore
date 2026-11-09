@@ -1,0 +1,8 @@
+﻿# Files Docker must not copy into the build (paths are relative to the RaceDay folder)
+**/bin/
+**/obj/
+**/.vs/
+**/*.user
+**/appsettings.Development.json
+**/.git
+**/.gitignore
