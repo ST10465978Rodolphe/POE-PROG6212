@@ -404,3 +404,14 @@ a.rd-card {
     font-weight: 700;
     letter-spacing: 0.04em;
 }
+
+/* ---------- Error page ---------- */
+
+.error-code {
+    font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-size: 6rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    color: var(--rd-orange);
+}
