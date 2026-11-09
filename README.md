@@ -282,7 +282,7 @@ application), runs all unit tests and builds the Docker image of the web applica
 Unlisted YouTube video demonstrating the full running application, the MVC structure, the
 Azure Blob Storage integration and the Docker setup:
 
-[Insert your Part 3 YouTube link here]
+https://youtu.be/hOzV5YzsFwc
 
 ### Design Decisions and Limitations
 - The web application contains no database code. Showing the right data to the right role
