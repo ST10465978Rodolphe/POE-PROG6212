@@ -275,7 +275,7 @@ application), runs all unit tests and builds the Docker image of the web applica
 
 ### GitHub Actions Screenshot
 
-![CI/CD green build](docs/ci-success-part3.png)
+![CI/CD green build](docs/ci-success-part3.PNG)
 
 ### Video Presentation
 
