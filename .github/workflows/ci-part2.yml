@@ -1,4 +1,4 @@
-name: Part 2 - Build and Test
+name: RaceDay - Build, Test and Docker image
 
 on:
   push:
@@ -15,17 +15,20 @@ jobs:
 
       - name: Check repository structure
         run: |
-          for d in docs RaceDay/RaceDay.Api RaceDay/RaceDay.Contracts RaceDay/RaceDay.Api.Tests; do
+          for d in docs RaceDay/RaceDay.Api RaceDay/RaceDay.Contracts RaceDay/RaceDay.Web RaceDay/RaceDay.Api.Tests; do
             if [ ! -d "$d" ]; then
               echo "ERROR: $d folder is missing"
               exit 1
             fi
             echo "$d found"
           done
-          if [ ! -f "RaceDay/RaceDay.slnx" ]; then
-            echo "ERROR: RaceDay/RaceDay.slnx is missing"
-            exit 1
-          fi
+          for f in RaceDay/RaceDay.slnx RaceDay/RaceDay.Web/Dockerfile; do
+            if [ ! -f "$f" ]; then
+              echo "ERROR: $f is missing"
+              exit 1
+            fi
+            echo "$f found"
+          done
           echo "Repository structure is valid."
 
       # Several SDKs are installed so the build works whichever .NET version the
@@ -42,10 +45,15 @@ jobs:
         working-directory: RaceDay
         run: dotnet restore RaceDay.slnx
 
-      - name: Build solution
+      # The solution contains the API, the contracts, the MVC web application and the tests
+      - name: Build solution (API and MVC web application)
         working-directory: RaceDay
         run: dotnet build RaceDay.slnx --no-restore --configuration Release
 
       - name: Run unit tests
         working-directory: RaceDay
         run: dotnet test RaceDay.slnx --no-build --configuration Release --verbosity normal
+
+      # Proves that the Dockerfile of the MVC application builds a working image
+      - name: Build Docker image of the MVC web application
+        run: docker build -f RaceDay/RaceDay.Web/Dockerfile -t raceday-web RaceDay
