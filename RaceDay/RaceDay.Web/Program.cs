@@ -35,6 +35,9 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Ligne ajoutée pour gérer les codes d'erreur (comme 404 ou 400)
+app.UseStatusCodePagesWithReExecute("/Home/Error", "?code={0}");
+
 app.UseHttpsRedirection();
 
 // Always use "." for decimals and the same date format, whatever the Windows language is
@@ -49,9 +52,11 @@ app.UseRouting();
 
 // Enable session middleware
 app.UseSession();
+
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
